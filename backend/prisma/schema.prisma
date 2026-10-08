@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  SELLER
+  ADMIN
+}
+
+enum AuctionStatus {
+  DRAFT
+  SCHEDULED
+  LIVE
+  ENDED
+  CANCELLED
+}
+
+enum WinnerMode {
+  RANDOM_DRAW
+  LOWEST_UNIQUE_BID
+  HIGHEST_BID
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  auctions     Auction[]
+  bids         Bid[]
+  wallet       Wallet?
+  watchlists   Watchlist[]
+  notifications Notification[]
+}
+
+model Wallet {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  balance   Float    @default(0.0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+}
+
+enum TransactionType {
+  TOPUP
+  BID_FEE
+  BID_REFUND
+  WITHDRAWAL
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  walletId    String
+  amount      Float
+  type        TransactionType
+  description String?
+  createdAt   DateTime        @default(now())
+
+  wallet Wallet @relation(fields: [walletId], references: [id])
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  image       String?
+  auctions    Auction[]
+}
+
+model Auction {
+  id             String        @id @default(uuid())
+  title          String
+  description    String        @db.Text
+  categoryId     String
+  sellerId       String
+  condition      String
+  entryFee       Float         @default(0.0)
+  startTime      DateTime
+  endTime        DateTime
+  maxBidsPerUser Int           @default(0) // 0 means unlimited
+  status         AuctionStatus @default(DRAFT)
+  winnerMode     WinnerMode    @default(RANDOM_DRAW)
+  
+  // Fair Draw Commitment
+  seedHash       String?       // Published on creation
+  seed           String?       // Revealed after draw
+  
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  category Category       @relation(fields: [categoryId], references: [id])
+  seller   User           @relation(fields: [sellerId], references: [id])
+  images   AuctionImage[]
+  bids     Bid[]
+  draws    Draw[]         // Audit log of draws
+  watchers Watchlist[]
+}
+
+model AuctionImage {
+  id        String  @id @default(uuid())
+  auctionId String
+  url       String
+  isPrimary Boolean @default(false)
+
+  auction Auction @relation(fields: [auctionId], references: [id])
+}
+
+model Bid {
+  id        String   @id @default(uuid())
+  auctionId String
+  userId    String
+  amount    Float    // Used for HIGHEST_BID or LOWEST_UNIQUE_BID
+  createdAt DateTime @default(now())
+
+  auction Auction @relation(fields: [auctionId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@unique([auctionId, userId, amount], name: "unique_bid_per_user")
+}
+
+model Draw {
+  id        String   @id @default(uuid())
+  auctionId String   @unique
+  winnerId  String?
+  winningBidId String?
+  bidsHash  String   // Hash of all valid bids at the time of draw
+  details   Json     // Additional details like runner-ups
+  createdAt DateTime @default(now())
+
+  auction Auction @relation(fields: [auctionId], references: [id])
+}
+
+model Watchlist {
+  id        String   @id @default(uuid())
+  userId    String
+  auctionId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
+  auction Auction @relation(fields: [auctionId], references: [id])
+
+  @@unique([userId, auctionId])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
