@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './auth/auth.module';
-import { AuctionsModule } from './auctions/auctions.module';
-import { MinioModule } from './minio/minio.module';
+import { AppController } from './app.controller.js';
+import { AppService } from './app.service.js';
+import { PrismaModule } from './prisma/prisma.module.js';
+import { AuthModule } from './auth/auth.module.js';
+import { AuctionsModule } from './auctions/auctions.module.js';
+import { MinioModule } from './minio/minio.module.js';
 import { BullModule } from '@nestjs/bullmq';
 
 @Module({

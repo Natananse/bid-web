@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { MinioService } from '../minio/minio.service';
-import { CreateAuctionDto } from './dto/create-auction.dto';
-import { generateSeed } from './draw-engine';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { MinioService } from '../minio/minio.service.js';
+import { CreateAuctionDto } from './dto/create-auction.dto.js';
+import { generateSeed } from './draw-engine.js';
 
 @Injectable()
 export class AuctionsService {

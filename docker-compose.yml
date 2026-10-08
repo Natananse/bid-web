@@ -23,7 +23,7 @@ services:
     restart: always
 
   minio:
-    image: minio/minio:latest
+    image: quay.io/minio/minio:latest
     container_name: bidnest-minio
     environment:
       MINIO_ROOT_USER: minioadmin
@@ -37,7 +37,7 @@ services:
     restart: always
 
   createbuckets:
-    image: minio/mc
+    image: quay.io/minio/mc
     depends_on:
       - minio
     entrypoint: >

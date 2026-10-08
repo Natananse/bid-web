@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import * as argon2 from 'argon2';
-import { generateSeed } from './auctions/draw-engine';
+import { generateSeed } from './auctions/draw-engine.js';
 
 const prisma = new PrismaClient();
 
