@@ -3,6 +3,13 @@ import { AppModule } from './app.module.js';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+process.on('unhandledRejection', (err) => {
+  console.warn('Unhandled rejection (ignored in dev):', (err as Error)?.message);
+});
+process.on('uncaughtException', (err) => {
+  console.warn('Uncaught exception (ignored in dev):', err?.message);
+});
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 

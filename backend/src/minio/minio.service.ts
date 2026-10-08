@@ -11,7 +11,7 @@ export class MinioService implements OnModuleInit {
   constructor(private configService: ConfigService) {
     this.minioClient = new Minio.Client({
       endPoint: this.configService.get('MINIO_ENDPOINT') || '127.0.0.1',
-      port: parseInt(this.configService.get('MINIO_PORT'), 10) || 9000,
+      port: parseInt(this.configService.get<string>('MINIO_PORT') ?? '9000', 10),
       useSSL: false,
       accessKey: this.configService.get('MINIO_ACCESS_KEY') || 'minioadmin',
       secretKey: this.configService.get('MINIO_SECRET_KEY') || 'minioadminpassword',
@@ -44,7 +44,7 @@ export class MinioService implements OnModuleInit {
       }
       this.logger.log('MinIO initialized successfully');
     } catch (error) {
-      this.logger.error('Failed to initialize MinIO. Is it running? Error: ' + error.message);
+      this.logger.error('Failed to initialize MinIO. Is it running? Error: ' + (error as Error).message);
     }
   }
 
